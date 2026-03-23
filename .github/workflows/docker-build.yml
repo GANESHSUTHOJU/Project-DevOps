@@ -2,13 +2,13 @@ name: Docker Build and Test
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main, master, develop ]
     paths:
       - 'backend/**'
       - 'frontend/**'
       - 'docker-compose.yml'
   pull_request:
-    branches: [ main ]
+    branches: [ main, master ]
     paths:
       - 'backend/**'
       - 'frontend/**'
@@ -124,7 +124,7 @@ jobs:
             spec:
               containers:
               - name: backend
-                image: \${{ env.REGISTRY }}/\${{ env.IMAGE_NAME }}-backend:latest
+                image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backend:latest
                 ports:
                 - containerPort: 5000
                 env:
@@ -163,7 +163,7 @@ jobs:
             spec:
               containers:
               - name: frontend
-                image: \${{ env.REGISTRY }}/\${{ env.IMAGE_NAME }}-frontend:latest
+                image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend:latest
                 ports:
                 - containerPort: 80
                 livenessProbe:

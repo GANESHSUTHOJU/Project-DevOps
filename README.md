@@ -1,5 +1,8 @@
 # Simple Web Application with CI/CD Pipeline
 
+![CI/CD Pipeline](https://github.com/GANESHSUTHOJU/Project-DevOps/workflows/CI%2CD%20Pipeline/badge.svg)
+![Docker Build](https://github.com/GANESHSUTHOJU/Project-DevOps/workflows/Docker%20Build%20and%20Test/badge.svg)
+
 A modern web application built with React frontend, Node.js backend, containerized with Docker, and deployed using GitHub Actions CI/CD pipeline.
 
 ## 🏗️ Architecture
