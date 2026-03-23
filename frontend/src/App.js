@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './App.css';
 
-// ✅ Render deployment URL
+// ✅ Render deployment URL with fallback
 const API_URL = process.env.NODE_ENV === 'production' 
   ? "https://project-devops-backend.onrender.com" 
   : "http://localhost:5000";
@@ -20,11 +20,20 @@ function App() {
   // 🔹 Fetch users
   const fetchUsers = async () => {
     try {
+      console.log('Fetching from:', API_URL);
       const response = await axios.get(`${API_URL}/api/users`);
+      console.log('Response:', response.data);
       setUsers(response.data);
+      setError('');
     } catch (err) {
-      console.error(err);
-      setError('❌ Failed to fetch users');
+      console.error('Fetch error:', err);
+      if (err.response) {
+        setError(`❌ Server Error: ${err.response.status}`);
+      } else if (err.request) {
+        setError(`❌ Network Error: Cannot reach ${API_URL}`);
+      } else {
+        setError(`❌ Error: ${err.message}`);
+      }
     } finally {
       setLoading(false);
     }
