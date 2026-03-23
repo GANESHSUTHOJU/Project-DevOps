@@ -2,41 +2,53 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './App.css';
 
-// 👉 Replace this with YOUR backend URL
-const API_URL = "https://project-devops-qszg.onrender.com";
+// ✅ Replace with YOUR actual backend URL
+const API_URL = "https://project-devops-2.onrender.com";
 
 function App() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState('');
   const [newUser, setNewUser] = useState({ name: '', email: '' });
 
   useEffect(() => {
     fetchUsers();
   }, []);
 
+  // 🔹 Fetch users
   const fetchUsers = async () => {
     try {
       const response = await axios.get(`${API_URL}/api/users`);
       setUsers(response.data);
-      setLoading(false);
     } catch (err) {
-      setError('Failed to fetch users');
+      console.error(err);
+      setError('❌ Failed to fetch users');
+    } finally {
       setLoading(false);
     }
   };
 
+  // 🔹 Add user
   const addUser = async (e) => {
     e.preventDefault();
+
+    if (!newUser.name || !newUser.email) {
+      setError("⚠️ Please fill all fields");
+      return;
+    }
+
     try {
       const response = await axios.post(`${API_URL}/api/users`, newUser);
       setUsers([...users, response.data]);
       setNewUser({ name: '', email: '' });
+      setError('');
     } catch (err) {
-      setError('Failed to add user');
+      console.error(err);
+      setError('❌ Failed to add user');
     }
   };
 
+  // 🔹 Handle input
   const handleInputChange = (e) => {
     setNewUser({
       ...newUser,
@@ -44,17 +56,20 @@ function App() {
     });
   };
 
-  if (loading) return <div className="container">Loading...</div>;
-  if (error) return <div className="container error">{error}</div>;
+  // 🔹 UI states
+  if (loading) return <div className="container">⏳ Loading...</div>;
 
   return (
     <div className="container">
       <header className="header">
-        <h1>Simple Web Application</h1>
-        <p>React Frontend + Node.js Backend + Docker + GitHub Actions</p>
+        <h1>🚀 Simple Web Application</h1>
+        <p>React + Node.js + Docker + CI/CD</p>
       </header>
 
+      {error && <div className="error">{error}</div>}
+
       <main>
+        {/* Add User Form */}
         <section className="user-form">
           <h2>Add New User</h2>
           <form onSubmit={addUser}>
@@ -78,13 +93,15 @@ function App() {
           </form>
         </section>
 
+        {/* User List */}
         <section className="user-list">
           <h2>Users</h2>
+
           {users.length === 0 ? (
             <p>No users found</p>
           ) : (
             <div className="user-grid">
-              {users.map(user => (
+              {users.map((user) => (
                 <div key={user.id} className="user-card">
                   <h3>{user.name}</h3>
                   <p>{user.email}</p>
