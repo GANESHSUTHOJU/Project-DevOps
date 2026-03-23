@@ -1,5 +1,7 @@
 name: Docker Build and Test
-
+env:
+  REGISTRY: docker.io
+  IMAGE_NAME: devops-app
 on:
   push:
     branches: [ main, master, develop ]
@@ -13,10 +15,6 @@ on:
       - 'backend/**'
       - 'frontend/**'
       - 'docker-compose.yml'
-
-env:
-  REGISTRY: docker.io
-  IMAGE_NAME: devops-app
 
 jobs:
   docker-build-test:
@@ -53,6 +51,8 @@ jobs:
       run: |
         # Create test docker-compose file
         cat > docker-compose.test.yml << EOF
+        version: '3.8'
+        
         services:
           backend:
             image: webapp-backend:test
@@ -112,6 +112,8 @@ jobs:
         kind: Deployment
         metadata:
           name: webapp-backend
+          labels:
+            app: webapp-backend
         spec:
           replicas: 2
           selector:
@@ -127,11 +129,30 @@ jobs:
                 image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backend:latest
                 ports:
                 - containerPort: 5000
+                env:
+                - name: NODE_ENV
+                  value: "production"
+                - name: PORT
+                  value: "5000"
+                livenessProbe:
+                  httpGet:
+                    path: /api/health
+                    port: 5000
+                  initialDelaySeconds: 30
+                  periodSeconds: 10
+                readinessProbe:
+                  httpGet:
+                    path: /api/health
+                    port: 5000
+                  initialDelaySeconds: 5
+                  periodSeconds: 5
         ---
         apiVersion: apps/v1
         kind: Deployment
         metadata:
           name: webapp-frontend
+          labels:
+            app: webapp-frontend
         spec:
           replicas: 2
           selector:
@@ -147,6 +168,18 @@ jobs:
                 image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend:latest
                 ports:
                 - containerPort: 80
+                livenessProbe:
+                  httpGet:
+                    path: /
+                    port: 80
+                  initialDelaySeconds: 30
+                  periodSeconds: 10
+                readinessProbe:
+                  httpGet:
+                    path: /
+                    port: 80
+                  initialDelaySeconds: 5
+                  periodSeconds: 5
         EOF
         
-        echo "✅ Deployment manifest generated successfully"
+        echo "Deployment manifest generated successfully"
