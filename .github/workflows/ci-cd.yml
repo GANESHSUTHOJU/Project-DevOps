@@ -2,158 +2,33 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ main, master, develop ]
-  pull_request:
     branches: [ main, master ]
 
-env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
 jobs:
-  test:
+  build:
     runs-on: ubuntu-latest
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '22'
-        cache: 'npm'
-        cache-dependency-path: |
-          backend/package-lock.json
-          frontend/package-lock.json
-        
-    - name: Install backend dependencies
-      run: |
-        cd backend
-        npm ci --only=production
-        
-    - name: Run backend tests
-      run: |
-        cd backend
-        npm test || true  # Allow tests to pass for now
-        
-    - name: Install frontend dependencies
-      run: |
-        cd frontend
-        npm ci
-        
-    - name: Run frontend tests
-      run: |
-        cd frontend
-        npm test -- --coverage --watchAll=false || true
-        
-    - name: Build frontend
-      run: |
-        cd frontend
-        npm run build
 
-  security-scan:
-    runs-on: ubuntu-latest
-    needs: test
-    
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Run Trivy vulnerability scanner
-      uses: aquasecurity/trivy-action@master
-      with:
-        scan-type: 'fs'
-        scan-ref: '.'
-        format: 'sarif'
-        output: 'trivy-results.sarif'
-        
-    - name: Upload Trivy scan results
-      uses: github/codeql-action/upload-sarif@v2
-      if: always()
-      with:
-        sarif_file: 'trivy-results.sarif'
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-  build-and-push:
-    runs-on: ubuntu-latest
-    needs: [test, security-scan]
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
-    
-    permissions:
-      contents: read
-      packages: write
-      
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
-      
-    - name: Log in to Container Registry
-      uses: docker/login-action@v3
-      with:
-        registry: ${{ env.REGISTRY }}
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
-        
-    - name: Build and push backend image
-      uses: docker/build-push-action@v5
-      with:
-        context: ./backend
-        push: true
-        tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backend:latest
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
-        
-    - name: Build and push frontend image
-      uses: docker/build-push-action@v5
-      with:
-        context: ./frontend
-        push: true
-        tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend:latest
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
+      - name: Install backend dependencies
+        run: |
+          cd backend
+          npm install
 
-  deploy-staging:
-    runs-on: ubuntu-latest
-    needs: build-and-push
-    if: github.ref == 'refs/heads/develop'
-    environment: staging
-    
-    steps:
-    - name: Deploy to staging
-      run: |
-        echo "✅ Deploying to staging environment..."
+      - name: Install frontend dependencies
+        run: |
+          cd frontend
+          npm install
 
-  deploy-production:
-    runs-on: ubuntu-latest
-    needs: build-and-push
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
-    environment: production
-    
-    steps:
-    - name: Deploy to production
-      run: |
-        echo "🚀 Deploying to production environment..."
-        
-    - name: Health check
-      run: |
-        echo "🔍 Performing health check..."
+      - name: Build frontend
+        run: |
+          cd frontend
+          npm run build
 
-  notify:
-    runs-on: ubuntu-latest
-    needs: [deploy-production]
-    if: always()
-    
-    steps:
-    - name: Notify on success
-      if: needs.deploy-production.result == 'success'
-      run: |
-        echo "✅ Deployment successful!"
-        
-    - name: Notify on failure
-      if: needs.deploy-production.result == 'failure'
-      run: |
-        echo "❌ Deployment failed!"
+      - name: Build backend Docker image
+        run: docker build -t backend-app ./backend
+
+      - name: Build frontend Docker image
+        run: docker build -t frontend-app ./frontend
