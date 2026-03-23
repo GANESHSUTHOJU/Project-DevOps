@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './App.css';
 
-// ✅ Replace with YOUR actual backend URL
-const API_URL = "https://project-devops-2.onrender.com";
+// ✅ Render deployment URL
+const API_URL = process.env.NODE_ENV === 'production' 
+  ? "https://project-devops-backend.onrender.com" 
+  : "http://localhost:5000";
 
 function App() {
   const [users, setUsers] = useState([]);
