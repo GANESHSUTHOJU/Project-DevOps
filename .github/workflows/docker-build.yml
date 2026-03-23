@@ -1,5 +1,7 @@
 name: Docker Build and Test
-
+env:
+  REGISTRY: docker.io
+  IMAGE_NAME: devops-app
 on:
   push:
     branches: [ main, master, develop ]
