@@ -1,0 +1,20 @@
+services:
+  # Backend Service
+  - type: web
+    name: project-devops-backend
+    env: node
+    repo: https://github.com/GANESHSUTHOJU/Project-DevOps.git
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /api/health
+    
+  # Frontend Service  
+  - type: web
+    name: project-devops-frontend
+    env: node
+    repo: https://github.com/GANESHSUTHOJU/Project-DevOps.git
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /
