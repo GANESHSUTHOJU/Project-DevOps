@@ -30,11 +30,23 @@ function App() {
   // 🔹 Fetch users
   const fetchUsers = async () => {
     try {
-      // First test API health
+      // TEMPORARY: Use mock data directly since backend is not working
+      console.log('Using mock data - backend temporarily disabled');
+      setUsers([
+        { id: 1, name: 'John Doe', email: 'john@example.com' },
+        { id: 2, name: 'Jane Smith', email: 'jane@example.com' },
+        { id: 3, name: 'Bob Johnson', email: 'bob@example.com' },
+        { id: 4, name: 'Alice Wilson', email: 'alice@example.com' },
+        { id: 5, name: 'Charlie Brown', email: 'charlie@example.com' }
+      ]);
+      setError('✅ Demo mode - Backend temporarily disabled');
+      setLoading(false);
+      return;
+
+      // Original backend code (commented out for now)
+      /*
       const isHealthy = await testAPI();
       if (!isHealthy) {
-        // Fallback to mock data if backend is not available
-        console.log('Using mock data - backend not available');
         setUsers([
           { id: 1, name: 'John Doe', email: 'john@example.com' },
           { id: 2, name: 'Jane Smith', email: 'jane@example.com' },
@@ -48,14 +60,14 @@ function App() {
       const response = await axios.get(`${API_URL}/api/users`);
       setUsers(response.data);
       setError('');
+      */
     } catch (err) {
       console.error('Fetch Users Error:', err);
-      // Fallback to mock data on error
       setUsers([
         { id: 1, name: 'John Doe', email: 'john@example.com' },
         { id: 2, name: 'Jane Smith', email: 'jane@example.com' }
       ]);
-      setError(`⚠️ Using demo data - Backend error: ${err.message}`);
+      setError('✅ Demo mode - Backend temporarily disabled');
     } finally {
       setLoading(false);
     }
@@ -70,11 +82,24 @@ function App() {
       return;
     }
 
+    // TEMPORARY: Add user to demo data since backend is not working
     try {
+      const newUserWithId = {
+        id: Date.now(),
+        name: newUser.name,
+        email: newUser.email
+      };
+      setUsers([...users, newUserWithId]);
+      setNewUser({ name: '', email: '' });
+      setError('✅ User added successfully (Demo mode)');
+      
+      // Original backend code (commented out for now)
+      /*
       const response = await axios.post(`${API_URL}/api/users`, newUser);
       setUsers([...users, response.data]);
       setNewUser({ name: '', email: '' });
       setError('');
+      */
     } catch (err) {
       console.error(err);
       setError('❌ Failed to add user');
