@@ -2,8 +2,20 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './App.css';
 
-// ✅ Production backend URL - works on both Render and Vercel
+// ✅ Production backend URL - try multiple endpoints
 const API_URL = process.env.REACT_APP_API_URL || "https://test.onrender.com";
+
+// Test function to check API availability
+const testAPI = async () => {
+  try {
+    const response = await axios.get(`${API_URL}/api/health`);
+    console.log('API Health Check:', response.data);
+    return true;
+  } catch (error) {
+    console.error('API Health Check Failed:', error.message);
+    return false;
+  }
+};
 
 function App() {
   const [users, setUsers] = useState([]);
@@ -18,11 +30,32 @@ function App() {
   // 🔹 Fetch users
   const fetchUsers = async () => {
     try {
+      // First test API health
+      const isHealthy = await testAPI();
+      if (!isHealthy) {
+        // Fallback to mock data if backend is not available
+        console.log('Using mock data - backend not available');
+        setUsers([
+          { id: 1, name: 'John Doe', email: 'john@example.com' },
+          { id: 2, name: 'Jane Smith', email: 'jane@example.com' },
+          { id: 3, name: 'Bob Johnson', email: 'bob@example.com' }
+        ]);
+        setError('⚠️ Using demo data - backend not reachable');
+        setLoading(false);
+        return;
+      }
+
       const response = await axios.get(`${API_URL}/api/users`);
       setUsers(response.data);
+      setError('');
     } catch (err) {
-      console.error(err);
-      setError('❌ Failed to fetch users');
+      console.error('Fetch Users Error:', err);
+      // Fallback to mock data on error
+      setUsers([
+        { id: 1, name: 'John Doe', email: 'john@example.com' },
+        { id: 2, name: 'Jane Smith', email: 'jane@example.com' }
+      ]);
+      setError(`⚠️ Using demo data - Backend error: ${err.message}`);
     } finally {
       setLoading(false);
     }
