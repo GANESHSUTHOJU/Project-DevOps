@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './App.css';
 
-// ✅ Production backend URL for Render
-const API_URL = "https://test.onrender.com";
+// ✅ Production backend URL - works on both Render and Vercel
+const API_URL = process.env.REACT_APP_API_URL || "https://test.onrender.com";
 
 function App() {
   const [users, setUsers] = useState([]);
