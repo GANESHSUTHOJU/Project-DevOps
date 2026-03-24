@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './App.css';
 
-// ✅ Local development backend URL
-const API_URL = "http://localhost:5000";
+// ✅ Production backend URL for Render
+const API_URL = "https://test.onrender.com";
 
 function App() {
   const [users, setUsers] = useState([]);
