@@ -16,24 +16,25 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Setup Node.js
+    - name: Setup Node.js without cache
       uses: actions/setup-node@v4
       with:
         node-version: '22'
+        cache: 'never'
 
     # Backend
-    - name: Install backend dependencies
+    - name: Clean install backend dependencies
       run: |
         cd backend
-        rm -f package-lock.json
-        npm install
+        rm -rf node_modules package-lock.json
+        npm install --no-cache --prefer-offline
 
     # Frontend
-    - name: Install frontend dependencies
+    - name: Clean install frontend dependencies
       run: |
         cd frontend
-        rm -f package-lock.json
-        npm install
+        rm -rf node_modules package-lock.json
+        npm install --no-cache --prefer-offline
 
     - name: Build frontend
       run: |
