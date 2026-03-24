@@ -1,7 +1,19 @@
-# This is a placeholder - Render should use the backend/Dockerfile
+# Production Dockerfile for backend
 FROM node:22-alpine
+
 WORKDIR /app
-COPY . .
+
+# Copy package files
+COPY backend/package*.json ./
+
+# Install dependencies
 RUN npm install
+
+# Copy source code
+COPY backend/server.js ./
+
+# Expose port
 EXPOSE 5000
-CMD ["npm", "start"]
+
+# Start the application
+CMD ["node", "server.js"]
